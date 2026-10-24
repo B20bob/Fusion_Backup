@@ -212,6 +212,13 @@ def run(context):
                 except Exception as e:
                     log('SCAN FAIL project "{}": {}'.format(proj.name, e))
 
+        # Designs that share a name in the same folder always get an id
+        # suffix, so they never overwrite each other on any run.
+        name_counts = {}
+        for df, parts in to_process:
+            key = '/'.join(parts + [safe_name(df.name)]).lower()
+            name_counts[key] = name_counts.get(key, 0) + 1
+
         # Work out which designs actually need exporting
         pending = []
         for df, parts in to_process:
@@ -243,7 +250,6 @@ def run(context):
 
         # ------------------------------------------------------ 2. export --
         progress.show('Fusion Backup', 'Starting...', 0, len(pending), 0)
-        used_paths = set()
         ok = 0
         partial = 0
         failed = 0
@@ -259,10 +265,9 @@ def run(context):
             folder = os.path.join(root, *parts)
             os.makedirs(folder, exist_ok=True)
             base = os.path.join(folder, safe_name(df.name))
-            # Two designs with the same name in the same folder -> add an id
-            if base.lower() in used_paths:
-                base = '{} [{}]'.format(base, df.id[-6:])
-            used_paths.add(base.lower())
+            key = '/'.join(parts + [safe_name(df.name)]).lower()
+            if name_counts.get(key, 0) > 1:
+                base = '{} [{}]'.format(base, safe_name(df.id[-6:]))
 
             doc = None
             already_open = False
