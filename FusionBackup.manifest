@@ -1,0 +1,10 @@
+{
+	"autodeskProduct": "Fusion",
+	"type": "script",
+	"author": "Calvin",
+	"description": {
+		"": "Backs up every design in your Fusion account to a local folder as .f3d and .step. Incremental: only exports new or changed designs on later runs."
+	},
+	"supportedOS": "windows|mac",
+	"editEnabled": true
+}
